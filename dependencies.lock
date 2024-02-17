@@ -1,0 +1,27 @@
+dependencies:
+  cmd_nvs:
+    component_hash: null
+    source:
+      path: /home/ok-home/esp/v5.2/esp-idf/examples/system/console/advanced/components/cmd_nvs
+      type: local
+    version: '*'
+  cmd_system:
+    component_hash: null
+    source:
+      path: /home/ok-home/esp/v5.2/esp-idf/examples/system/console/advanced/components/cmd_system
+      type: local
+    version: '*'
+  cmd_wifi:
+    component_hash: null
+    source:
+      path: /home/ok-home/esp/v5.2/esp-idf/examples/system/console/advanced/components/cmd_wifi
+      type: local
+    version: '*'
+  idf:
+    component_hash: null
+    source:
+      type: idf
+    version: 5.2.0
+manifest_hash: b9157e7f7cbf8e306006f87eda7e7069807c208ba78d5bf83f503c9cdb5c1b67
+target: esp32
+version: 1.0.0

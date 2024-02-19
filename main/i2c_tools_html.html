@@ -231,7 +231,7 @@
     <div class="cl1">
         <div class="cl04">
             <label class="cl01" for="i2cChipAddress">I2C Chip Address</label>
-            <input type="number" class="cl01" id="i2cChipAddress" min="0" max="127">
+            <input type="number" class="cl01" id="i2cChipAddress" min="0" max="127" value="1">
         </div>
         <div class="cl04">
             <label class="cl01" for="i2cDumpSize">I2C size of each read </label>
@@ -241,6 +241,45 @@
     <div class="column">
         <button class="btn" id="i2cDumpRegs">Examine registers</button>
     </div>
+
+    <div class="cl1">
+        <div class="cl04">
+            <label class="cl01" for="i2cRegisterGetAddress">I2C Register Address</label>
+            <input type="number" class="cl01" id="i2cRegisterGetAddress" min="0" max="255" value="1">
+        </div>
+        <div class="cl04">
+            <label class="cl01" for="i2cRegisterGetSize">I2C size of each read </label>
+            <input type="number" class="cl01" id="i2cRegisterGetSize" min="1" value="1">
+        </div>
+    </div>
+    <div class="column">
+        <button class="btn" id="i2cGetRegister">Read register</button>
+    </div>
+
+    <div class="cl1">
+        <div class="cl04">
+            <label class="cl01" for="i2cRegisterSetAddress">I2C Register Address</label>
+            <input type="number" class="cl01" id="i2cRegisterSetAddress" min="0" max="255" value="1">
+        </div>
+        <div class="cl04">
+            <label class="cl01" for="i2cRegisterSetSize">I2C size of Data </label>
+            <input type="number" class="cl01" id="i2cRegisterSetSize" min="1" value="1">
+        </div>
+        <div class="cl02">
+            <label class="cl01" for="i2cRegisterSetData">I2C Data to set </label>
+            <input  class="cl01" id="i2cRegisterSetData" >
+        </div>
+
+    </div>
+    <div class="column">
+        <button class="btn" id="i2cSetRegister">Set register</button>
+    </div>
+
+    <div id="LogArea" class="cl1">
+        <textarea id="logtext" rows="24" cols="50"></textarea>
+    </div>
+
+
 
     <script>
     </script>
@@ -253,6 +292,35 @@
             //socket.send(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
             console.log(JSON.stringify({ name: "i2cScanDev", msg: "ScanDev" }));
         });
+
+        document.getElementById("i2cDumpRegs").addEventListener("click", function (e) {
+            send_config_data();
+            console.log(JSON.stringify({ name: "i2cChipAddress", msg: document.getElementById("i2cChipAddress").value }));
+            console.log(JSON.stringify({ name: "i2cDumpSize", msg: document.getElementById("i2cDumpSize").value }));
+            //socket.send(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
+            console.log(JSON.stringify({ name: "i2cDumpRegs", msg: "DumpRegs" }));
+        });
+
+        document.getElementById("i2cGetRegister").addEventListener("click", function (e) {
+            send_config_data();
+            console.log(JSON.stringify({ name: "i2cChipAddress", msg: document.getElementById("i2cChipAddress").value }));
+            console.log(JSON.stringify({ name: "i2cRegisterGetAddress", msg: document.getElementById("i2cRegisterGetAddress").value }));
+            console.log(JSON.stringify({ name: "i2cRegisterGetSize", msg: document.getElementById("i2cRegisterGetSize").value }));
+            //socket.send(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
+            console.log(JSON.stringify({ name: "i2cGetRegsData", msg: "GetRegsData" }));
+        });
+
+        document.getElementById("i2cSetRegister").addEventListener("click", function (e) {
+            send_config_data();
+            console.log(JSON.stringify({ name: "i2cChipAddress", msg: document.getElementById("i2cChipAddress").value }));
+            console.log(JSON.stringify({ name: "i2cRegisterSetAddress", msg: document.getElementById("i2cRegisterSetAddress").value }));
+            console.log(JSON.stringify({ name: "i2cRegisterSetSize", msg: document.getElementById("i2cRegisterSetSize").value }));
+            console.log(JSON.stringify({ name: "i2cRegisterSetData", msg: document.getElementById("i2cRegisterSetData").value }));
+            //socket.send(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
+            console.log(JSON.stringify({ name: "i2cSetRegsData", msg: "SetRegsData" }));
+        });
+
+
 //        document.getElementById("goHome").addEventListener("click", function (e) {
             //onclick="window.location.href = '/'"
             //socket.close();
@@ -270,6 +338,9 @@
             console.log(JSON.stringify({ name: "i2cSCLConfig", msg: document.getElementById("i2cSCLConfig").value }));
             console.log(JSON.stringify({ name: "i2cFREQConfig", msg: document.getElementById("i2cFREQConfig").value }));
         }
+
+
+
 /*
         function receiveWsData(data) {
             try {

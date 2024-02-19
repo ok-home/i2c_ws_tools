@@ -337,6 +337,13 @@
             console.log(JSON.stringify({ name: "i2cSDAConfig", msg: document.getElementById("i2cSDAConfig").value }));
             console.log(JSON.stringify({ name: "i2cSCLConfig", msg: document.getElementById("i2cSCLConfig").value }));
             console.log(JSON.stringify({ name: "i2cFREQConfig", msg: document.getElementById("i2cFREQConfig").value }));
+
+
+            textstr.value = JSON.stringify({ name: "i2cPortConfig", msg: document.getElementById("i2cPortConfig").value }) + "\n" + textstr.value;
+            textstr.value = JSON.stringify({ name: "i2cSDAConfig", msg: document.getElementById("i2cSDAConfig").value }) + "\n" + textstr.value;
+            textstr.value = JSON.stringify({ name: "i2cSCLConfig", msg: document.getElementById("i2cSCLConfig").value }) + "\n" + textstr.value;
+            textstr.value = JSON.stringify({ name: "i2cFREQConfig", msg: document.getElementById("i2cFREQConfig").value }) + "\n" + textstr.value;
+
         }
 
 
@@ -370,6 +377,7 @@
         wsHostStr += (document.location.pathname == '/') ? "ws" : "/ws";
         var socket = new WebSocket(wsHostStr);
         */
+        let textstr = document.getElementById("logtext");
     </script>
 
     <script> // события WS

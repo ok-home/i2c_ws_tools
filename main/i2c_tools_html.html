@@ -226,18 +226,32 @@
     </div>
 
     <div class="column">
-        <button class="btn" id="i2cSETCConfig">SET I2C Port Configuration</button>
+        <button class="btn" id="i2cScanDev">I2C Scan devices on the bus</button>
     </div>
+    <div class="cl1">
+        <div class="cl04">
+            <label class="cl01" for="i2cChipAddress">I2C Chip Address</label>
+            <input type="number" class="cl01" id="i2cChipAddress" min="0" max="127">
+        </div>
+        <div class="cl04">
+            <label class="cl01" for="i2cDumpSize">I2C size of each read </label>
+            <input type="number" class="cl01" id="i2cDumpSize" min="1" value="1">
+        </div>
+    </div>
+    <div class="column">
+        <button class="btn" id="i2cDumpRegs">Examine registers</button>
+    </div>
+
     <script>
     </script>
 
     <script>/*WIFI обновление*/
 
 
-        document.getElementById("i2cSETCConfig").addEventListener("click", function (e) {
+        document.getElementById("i2cScanDev").addEventListener("click", function (e) {
             send_config_data();
             //socket.send(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
-            console.log(JSON.stringify({ name: "i2cSETCConfig", msg: "setConfig" }));
+            console.log(JSON.stringify({ name: "i2cScanDev", msg: "ScanDev" }));
         });
 //        document.getElementById("goHome").addEventListener("click", function (e) {
             //onclick="window.location.href = '/'"

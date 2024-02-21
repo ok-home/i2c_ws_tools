@@ -1,3 +1,11 @@
-idf_component_register(SRCS "i2ctools_example_main.c"
-                            "cmd_i2ctools.c"
-                       INCLUDE_DIRS ".")
+idf_component_register(
+        SRCS 
+            "i2c_tools_web_server.c" 
+            "i2c_tools.c" 
+            "i2c_tools_wifi_connect.c" 
+            "i2c_tools_cmd.c" 
+        INCLUDE_DIRS 
+            "."
+        EMBED_FILES
+            "i2c_tools_html.html"
+)

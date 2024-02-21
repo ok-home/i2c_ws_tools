@@ -86,8 +86,8 @@ void i2c_tools_ws_server(void)
 
 //#ifdef CONFIG_ANALYZER_WIFI_CONNECT
 
-#include "i2c_tools_wifi_connect.h"
-i2c_tools_wifi_connect();
+//#include "i2c_tools_wifi_connect.h"
+//i2c_tools_wifi_connect();
 
 //#endif
 

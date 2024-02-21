@@ -17,6 +17,7 @@
 #include "esp_netif.h"
 #include "esp_http_server.h"
 
+#include "jsmn.h"
 #include "i2c_tools.h"
 
 
@@ -40,14 +41,14 @@ static const char *TAG = "i2c_tools_cmd";
 #define I2C_TRIG_HTML "i2cTrigConfig"
 
 #define I2C_CHIP_HTML "i2cChipAddress"
-#define i2C_CHIP_SIZE_HTML "i2cDumpSize"
+#define I2C_CHIP_SIZE_HTML "i2cDumpSize"
 
 #define I2C_READ_HTML "i2cRegisterGetAddress"
-#define i2C_READ_SIZE_HTML "i2cRegisterGetSize"
+#define I2C_READ_SIZE_HTML "i2cRegisterGetSize"
 
 #define I2C_WRITE_HTML "i2cRegisterSetAddress"
-#define i2C_WRITE_SIZE_HTML "i2cRegisterSetSize"
-#define i2C_WRITE_DATA_HTML "i2cRegisterSetData"
+#define I2C_WRITE_SIZE_HTML "i2cRegisterSetSize"
+#define I2C_WRITE_DATA_HTML "i2cRegisterSetData"
 
 // cmd
 #define I2C_SCAN_CMD "ScanCmd"
@@ -68,7 +69,7 @@ typedef struct i2c_tools_cfg
     int reg_read;
     int read_size;
     int reg_write;
-    int write_size
+    int write_size;
     uint8_t write_data[32];
 } i2c_tools_cfg_t;
 
@@ -140,7 +141,7 @@ static int i2c_scan(httpd_req_t *req)
             i2c_master_start(cmd);
             i2c_master_write_byte(cmd, (address << 1) | WRITE_BIT, ACK_CHECK_EN);
             i2c_master_stop(cmd);
-            esp_err_t ret = i2c_master_cmd_begin(i2c_port, cmd, 50 / portTICK_PERIOD_MS);
+            esp_err_t ret = i2c_master_cmd_begin(i2c_cfg.port, cmd, 50 / portTICK_PERIOD_MS);
             i2c_cmd_link_delete(cmd);
             if (ret == ESP_OK) {
                 sprintf(adrstr,"%02x ", address);
@@ -231,15 +232,15 @@ static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
     }
     else if (strncmp(key, I2C_DUMP_CMD, sizeof(I2C_DUMP_CMD)-1) == 0)// key/value ->  restart or write
     {
-        i2c_dump(req);
+        //i2c_dump(req);
     }
     else if (strncmp(key, I2C_READ_CMD, sizeof(I2C_READ_CMD)-1) == 0)// key/value ->  restart or write
     {
-        i2c_read(req);
+        //i2c_read(req);
     }
     else if (strncmp(key, I2C_READ_CMD, sizeof(I2C_READ_CMD)-1) == 0)// key/value ->  restart or write
     {
-        i2c_write(req);
+        //i2c_write(req);
     }
 
     else 
@@ -254,7 +255,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
     if (req->method == HTTP_GET)
     {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened");
-        send_nvs_data(req); // read & send initial wifi data from nvs
+        //send_nvs_data(req); // read & send initial wifi data from nvs
         return ESP_OK;
     }
     httpd_ws_frame_t ws_pkt;
@@ -303,18 +304,18 @@ static esp_err_t get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 static const httpd_uri_t i2c_tools_gh = {
-    .uri = "i2cTools",
+    .uri = "/i2cTools",
     .method = HTTP_GET,
     .handler = get_handler,
     .user_ctx = NULL};
 static const httpd_uri_t i2c_tools_ws = {
-    .uri = "i2c/ws",
+    .uri = "/i2cTools/ws",
     .method = HTTP_GET,
     .handler = ws_handler,
     .user_ctx = NULL,
     .is_websocket = true};
 
-esp_err_t i2c_tools_connect_register_uri_handler(httpd_handle_t server)
+esp_err_t i2c_tools_register_uri_handlers(httpd_handle_t server)
 {
     esp_err_t ret = ESP_OK;
     ret = httpd_register_uri_handler(server, &i2c_tools_gh);

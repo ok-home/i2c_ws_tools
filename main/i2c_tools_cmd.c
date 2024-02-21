@@ -5,6 +5,21 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+#include <stdio.h>
+#include "driver/i2c.h"
+#include "esp_log.h"
+
+#include "esp_wifi.h"
+#include "esp_mac.h"
+#include "esp_event.h"
+#include "freertos/event_groups.h"
+#include <nvs_flash.h>
+#include "esp_netif.h"
+#include "esp_http_server.h"
+
+#include "i2c_tools.h"
+
+
 #define I2C_MASTER_TX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
 #define WRITE_BIT I2C_MASTER_WRITE  /*!< I2C master write */
@@ -14,8 +29,6 @@
 #define ACK_VAL 0x0                 /*!< I2C ack value */
 #define NACK_VAL 0x1                /*!< I2C nack value */
 
-
-#include "jsmn.h"
 
 static const char *TAG = "i2c_tools_cmd";
 

@@ -15,6 +15,8 @@
 #include "esp_netif.h"
 #include "esp_http_server.h"
 
+#include "i2c_tools.h"
+
 #define  CONFIG_I2C_TOOLS_WIFI_SSID "ok-home-Keenetic"
 #define  CONFIG_I2C_TOOLS_WIFI_PASS "RicohPriport"
 

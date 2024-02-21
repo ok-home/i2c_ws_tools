@@ -14,7 +14,7 @@
 #include <sys/param.h>
 
 #include <esp_http_server.h>
-#include "i2c_tools_ws.h"
+#include "i2c_tools.h"
 
 /* A simple example that demonstrates using websocket echo server
  */

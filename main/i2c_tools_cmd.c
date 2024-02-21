@@ -93,7 +93,6 @@ static void send_json_string(char *str, httpd_req_t *req)
 
 
 
-
 // write wifi data from ws to nvs
 static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
 {
@@ -103,16 +102,85 @@ static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
     if (err)
     {
         ESP_LOGE(TAG, "ERR jsonstr %s", jsonstr);
+        return;
     }
-    else
+    if (strncmp(key, I2C_PORT_HTML, sizeof(I2C_PORT_HTML)-1) == 0  ) 
     {
-        if (strncmp(key, NVS_COMPARE_KEY_PARAM, sizeof(NVS_COMPARE_KEY_PARAM)-1) == 0  ) // key/value -> wifi data
-        {
-        }
-        else if (strncmp(key, NVS_WIFI_RESTART_KEY, sizeof(NVS_WIFI_RESTART_KEY)) == 0)// key/value ->  restart or write
-        {
-        }
+        i2c_cfg.port = atoi(value);
     }
+    else if (strncmp(key, I2C_SCL_HTML, sizeof(I2C_SCL_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.scl = atoi(value);
+    }
+    else if (strncmp(key, I2C_SDA_HTML, sizeof(I2C_SDA_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.sda = atoi(value);
+    }
+    else if (strncmp(key, I2C_FREQ_HTML, sizeof(I2C_FREQ_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.freq = atoi(value);
+    }
+    else if (strncmp(key, I2C_TRIG_HTML, sizeof(I2C_TRIG_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.trig_pin = atoi(value);
+    }
+
+    else if (strncmp(key, I2C_CHIP_HTML, sizeof(I2C_CHIP_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.chip = atoi(value);
+    }
+    else if (strncmp(key, I2C_CHIP_SIZE_HTML, sizeof(I2C_CHIP_SIZE_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.dump_size = atoi(value);
+    }
+
+    else if (strncmp(key, I2C_READ_HTML, sizeof(I2C_READ_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.reg_read = atoi(value);
+    }
+    else if (strncmp(key, I2C_READ_SIZE_HTML, sizeof(I2C_READ_SIZE_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.read_size = atoi(value);
+    }
+
+    else if (strncmp(key, I2C_WRITE_HTML, sizeof(I2C_WRITE_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.reg_write  = atoi(value);
+    }
+    else if (strncmp(key, I2C_WRITE_SIZE_HTML, sizeof(I2C_WRITE_SIZE_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.write_size = atoi(value);
+    }
+    else if (strncmp(key, I2C_WRITE_DATA_HTML, sizeof(I2C_WRITE_DATA_HTML)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_cfg.write_data[0] = atoi(value); //tmp
+    }
+
+// cmd
+
+    else if (strncmp(key, I2C_SCAN_CMD, sizeof(I2C_SCAN_CMD)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_scan(req);
+    }
+    else if (strncmp(key, I2C_DUMP_CMD, sizeof(I2C_DUMP_CMD)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_dump(req);
+    }
+    else if (strncmp(key, I2C_READ_CMD, sizeof(I2C_READ_CMD)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_read(req);
+    }
+    else if (strncmp(key, I2C_READ_CMD, sizeof(I2C_READ_CMD)-1) == 0)// key/value ->  restart or write
+    {
+        i2c_write(req);
+    }
+
+    else 
+    {
+        ESP_LOGE(TAG, "ERR cmd %s", jsonstr);
+    }
+
+    return;
 }
 static esp_err_t ws_handler(httpd_req_t *req)
 {

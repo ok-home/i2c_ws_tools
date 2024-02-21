@@ -335,14 +335,14 @@
     <script>
         document.getElementById("i2cScanDev").addEventListener("click", function (e) {
             send_config_data();
-            sock_send(JSON.stringify({ name: "i2cScanDev", msg: "ScanCmd" }));
+            sock_send(JSON.stringify({ name: "ScanCmd", msg: "ScanCmd" }));
         });
 
         document.getElementById("i2cDumpRegs").addEventListener("click", function (e) {
             send_config_data();
             sock_send(JSON.stringify({ name: "i2cChipAddress", msg: document.getElementById("i2cChipAddress").value }));
             sock_send(JSON.stringify({ name: "i2cDumpSize", msg: document.getElementById("i2cDumpSize").value }));
-            sock_send(JSON.stringify({ name: "i2cDumpRegs", msg: "DumpCmd" }));
+            sock_send(JSON.stringify({ name: "DumpCmd", msg: "DumpCmd" }));
         });
 
         document.getElementById("i2cGetRegister").addEventListener("click", function (e) {
@@ -350,7 +350,7 @@
             sock_send(JSON.stringify({ name: "i2cChipAddress", msg: document.getElementById("i2cChipAddress").value }));
             sock_send(JSON.stringify({ name: "i2cRegisterGetAddress", msg: document.getElementById("i2cRegisterGetAddress").value }));
             sock_send(JSON.stringify({ name: "i2cRegisterGetSize", msg: document.getElementById("i2cRegisterGetSize").value }));
-            sock_send(JSON.stringify({ name: "i2cGetRegsData", msg: "GetCmd" }));
+            sock_send(JSON.stringify({ name: "GetCmd", msg: "GetCmd" }));
         });
 
         document.getElementById("i2cSetRegister").addEventListener("click", function (e) {
@@ -359,7 +359,7 @@
             sock_send(JSON.stringify({ name: "i2cRegisterSetAddress", msg: document.getElementById("i2cRegisterSetAddress").value }));
             sock_send(JSON.stringify({ name: "i2cRegisterSetSize", msg: document.getElementById("i2cRegisterSetSize").value }));
             sock_send(JSON.stringify({ name: "i2cRegisterSetData", msg: document.getElementById("i2cRegisterSetData").value }));
-            sock_send(JSON.stringify({ name: "i2cSetRegsData", msg: "SetCmd" }));
+            sock_send(JSON.stringify({ name: "SetCmd", msg: "SetCmd" }));
         });
         document.getElementById("goHome").addEventListener("click", function (e) {
         //onclick="window.location.href = '/'"

@@ -5,23 +5,53 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
-#include "nvs_wifi_connect_private.h"
-#include "nvs_wifi_connect.h"
-
 
 #include "jsmn.h"
 
-static const char *TAG = "nvs_wifi_connect_http_server";
+static const char *TAG = "i2c_tools_cmd";
 
-ESP_EVENT_DECLARE_BASE(NVS_WIFI_CONNECT_STOP_HTTPD);
-ESP_EVENT_DEFINE_BASE(NVS_WIFI_CONNECT_STOP_HTTPD);
-enum
+// cfg
+#define I2C_PORT_HTML "i2cPortConfig"
+#define I2C_SCL_HTML "i2cSCLConfig"
+#define I2C_SDA_HTML "i2cSDAConfig"
+#define I2C_FREQ_HTML "i2cFREQConfig"
+#define I2C_TRIG_HTML "i2cTrigConfig"
+
+#define I2C_CHIP_HTML "i2cChipAddress"
+#define i2C_CHIP_SIZE_HTML "i2cDumpSize"
+
+#define I2C_READ_HTML "i2cRegisterGetAddress"
+#define i2C_READ_SIZE_HTML "i2cRegisterGetSize"
+
+#define I2C_WRITE_HTML "i2cRegisterSetAddress"
+#define i2C_WRITE_SIZE_HTML "i2cRegisterSetSize"
+#define i2C_WRITE_DATA_HTML "i2cRegisterSetData"
+
+// cmd
+#define I2C_SCAN_CMD "ScanCmd"
+#define I2C_DUMP_CMD "DumpCmd"
+#define I2C_READ_CMD "GetCmd"
+#define I2C_WRITE_CMD "SetCmd"
+
+
+typedef struct i2c_tools_cfg
 {
-    NVS_WIFI_CONNECT_STOP_HTTPD_EVENT
-};
+    int trig_pin;
+    int port;
+    int scl;
+    int sda;
+    int freq;
+    int chip;
+    int dump_size;
+    int reg_read;
+    int read_size;
+    int reg_write;
+    int write_size
+    uint8_t write_data[32];
+} i2c_tools_cfg_t;
 
-static int srv_restart = 0;
-static nvs_wifi_connect_register_uri_handler_t srv_register_uri_handler;
+static i2c_tools_cfg_t i2c_cfg;
+
 
 // simple json parse -> only one parametr name/val
 static esp_err_t json_to_str_parm(char *jsonstr, char *nameStr, char *valStr) // распаковать строку json в пару  name/val
@@ -58,13 +88,17 @@ static void send_json_string(char *str, httpd_req_t *req)
     ws_pkt.len = strlen(str);
     httpd_ws_send_frame(req, &ws_pkt);
 }
+
+
+
+
+
+
 // write wifi data from ws to nvs
-static void set_nvs_data(char *jsonstr, httpd_req_t *req)
+static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
 {
     char key[16];
     char value[64];
-    nvs_handle_t nvs_handle;
-    nvs_open(NVS_STORAGE_NAME, NVS_READWRITE, &nvs_handle);
     esp_err_t err = json_to_str_parm(jsonstr, key, value); // decode json string to key/value pair
     if (err)
     {
@@ -74,29 +108,9 @@ static void set_nvs_data(char *jsonstr, httpd_req_t *req)
     {
         if (strncmp(key, NVS_COMPARE_KEY_PARAM, sizeof(NVS_COMPARE_KEY_PARAM)-1) == 0  ) // key/value -> wifi data
         {
-            if (nvs_set_str(nvs_handle, key, value)) // write key/value to nvs
-            {
-                ESP_LOGE(TAG, "ERR WRITE key %s value %s", key, value);
-            }
-            nvs_commit(nvs_handle);
-            nvs_close(nvs_handle);
         }
         else if (strncmp(key, NVS_WIFI_RESTART_KEY, sizeof(NVS_WIFI_RESTART_KEY)) == 0)// key/value ->  restart or write
         {
-            nvs_close(nvs_handle);
-            // if value == NVS_WIFI_RESTART_VALUE_RESTART -> full restart esp32 regardless of value srv_restart
-            // if srv_restart == NVS_WIFI_CONNECT_MODE_STAY_ACTIVE -> no operation
-            // if srv_restart == NVS_WIFI_CONNECT_MODE_STOP_SERVER -> stop httpd
-            // if srv_restart == NVS_WIFI_CONNECT_MODE_RESTART_ESP32 -> full restart esp32 regardless of value NVS_WIFI_RESTART_VALUE_RESTART
-            if (srv_restart == NVS_WIFI_CONNECT_MODE_RESTART_ESP32 || strncmp(value, NVS_WIFI_RESTART_VALUE_RESTART, sizeof(NVS_WIFI_RESTART_VALUE_RESTART)) == 0)
-            {
-                esp_restart();
-            }
-            else if (srv_restart == NVS_WIFI_CONNECT_MODE_STOP_SERVER)
-            {
-                // stop httpd server
-                ESP_ERROR_CHECK(esp_event_post(NVS_WIFI_CONNECT_STOP_HTTPD, NVS_WIFI_CONNECT_STOP_HTTPD_EVENT, NULL, 0, portMAX_DELAY));
-            }
         }
     }
 }
@@ -138,7 +152,8 @@ static esp_err_t ws_handler(httpd_req_t *req)
             return ret;
         }
     }
-    set_nvs_data((char *)ws_pkt.payload, req);
+    ESP_LOGI(TAG,"get cmd %s",(char *)ws_pkt.payload);
+    set_i2c_tools_data((char *)ws_pkt.payload, req);
     free(buf);
     return ret;
 }

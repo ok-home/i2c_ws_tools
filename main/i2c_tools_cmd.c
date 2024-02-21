@@ -5,6 +5,15 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+#define I2C_MASTER_TX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE 0 /*!< I2C master doesn't need buffer */
+#define WRITE_BIT I2C_MASTER_WRITE  /*!< I2C master write */
+#define READ_BIT I2C_MASTER_READ    /*!< I2C master read */
+#define ACK_CHECK_EN 0x1            /*!< I2C master will check ack from slave*/
+#define ACK_CHECK_DIS 0x0           /*!< I2C master will not check ack from slave */
+#define ACK_VAL 0x0                 /*!< I2C ack value */
+#define NACK_VAL 0x1                /*!< I2C nack value */
+
 
 #include "jsmn.h"
 
@@ -88,7 +97,52 @@ static void send_json_string(char *str, httpd_req_t *req)
     ws_pkt.len = strlen(str);
     httpd_ws_send_frame(req, &ws_pkt);
 }
-
+static esp_err_t i2c_master_driver_initialize(void)
+{
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = i2c_cfg.sda,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_io_num = i2c_cfg.scl,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master.clk_speed = i2c_cfg.freq,
+        // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
+    };
+    return i2c_param_config(i2c_cfg.port, &conf);
+}
+static int i2c_scan(httpd_req_t *req)
+{
+    i2c_driver_install(i2c_cfg.port, I2C_MODE_MASTER, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+    i2c_master_driver_initialize();
+    uint8_t address;
+    char adrstr[8] = {0};
+    char sendstr[64] = "     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  ";
+    send_json_string(sendstr,req);
+    for (int i = 0; i < 128; i += 16) {
+        sprintf(adrstr,"%02x: ", i);
+        strcpy(sendstr,adrstr);
+        for (int j = 0; j < 16; j++) {
+            address = i + j;
+            i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+            i2c_master_start(cmd);
+            i2c_master_write_byte(cmd, (address << 1) | WRITE_BIT, ACK_CHECK_EN);
+            i2c_master_stop(cmd);
+            esp_err_t ret = i2c_master_cmd_begin(i2c_port, cmd, 50 / portTICK_PERIOD_MS);
+            i2c_cmd_link_delete(cmd);
+            if (ret == ESP_OK) {
+                sprintf(adrstr,"%02x ", address);
+                strcat(sendstr,adrstr);
+            } else if (ret == ESP_ERR_TIMEOUT) {
+                strcat(sendstr,"UU ");
+            } else {
+                strcat(sendstr,"-- ");
+            }
+        }
+        send_json_string(sendstr,req);
+    }
+    i2c_driver_delete(i2c_cfg.port);
+    return 0;
+}
 
 
 

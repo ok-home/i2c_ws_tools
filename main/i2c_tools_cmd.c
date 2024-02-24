@@ -75,6 +75,11 @@ typedef struct i2c_tools_cfg
 
 static i2c_tools_cfg_t i2c_cfg;
 
+static void trig_set(int lvl)
+{
+    if(i2c_cfg.trig_pin != -1)
+        gpio_set_level(i2c_cfg.trig_pin,lvl);
+}
 
 // simple json parse -> only one parametr name/val
 static esp_err_t json_to_str_parm(char *jsonstr, char *nameStr, char *valStr) // распаковать строку json в пару  name/val
@@ -124,8 +129,15 @@ static esp_err_t i2c_master_driver_initialize(void)
     };
     return i2c_param_config(i2c_cfg.port, &conf);
 }
+static int first_init_gpio = 0;
 static int i2c_scan(httpd_req_t *req)
 {
+    if(first_init_gpio == 0 && i2c_cfg.trig_pin != -1)
+    {
+        gpio_reset_pin(i2c_cfg.trig_pin);
+        gpio_set_direction(i2c_cfg.trig_pin,GPIO_MODE_OUTPUT);
+        first_init_gpio = 1;
+    }
     i2c_driver_install(i2c_cfg.port, I2C_MODE_MASTER, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
     i2c_master_driver_initialize();
     uint8_t address;
@@ -141,7 +153,9 @@ static int i2c_scan(httpd_req_t *req)
             i2c_master_start(cmd);
             i2c_master_write_byte(cmd, (address << 1) | WRITE_BIT, ACK_CHECK_EN);
             i2c_master_stop(cmd);
+            trig_set(1);
             esp_err_t ret = i2c_master_cmd_begin(i2c_cfg.port, cmd, 50 / portTICK_PERIOD_MS);
+            trig_set(0);
             i2c_cmd_link_delete(cmd);
             if (ret == ESP_OK) {
                 sprintf(adrstr,"%02x: ", address);
@@ -177,7 +191,9 @@ static int i2c_read(httpd_req_t *req)
     }
     i2c_master_read_byte(cmd, data + i2c_cfg.read_size - 1, NACK_VAL);
     i2c_master_stop(cmd);
+    trig_set(1);
     esp_err_t ret = i2c_master_cmd_begin(i2c_cfg.port, cmd, 1000 / portTICK_PERIOD_MS);
+    trig_set(0);
     i2c_cmd_link_delete(cmd);
     char datastr[8] = {0};
     char sendstr[100] = "read";
@@ -186,7 +202,7 @@ static int i2c_read(httpd_req_t *req)
     if (ret == ESP_OK) {
         for (int i = 0; i < i2c_cfg.read_size; i++) {
             sprintf(datastr,"0x%02x ", data[i]);
-            strcat(sendstr,datastr)
+            strcat(sendstr,datastr);
             if ((i + 1) % 16 == 0) {
             send_json_string(sendstr,req);
             sendstr[0] = 0;
@@ -216,7 +232,7 @@ static int i2c_write(httpd_req_t *req)
     i2c_master_driver_initialize();
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, i2c_cfg.chip; << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, i2c_cfg.chip << 1 | WRITE_BIT, ACK_CHECK_EN);
     if (i2c_cfg.write_size) {
         i2c_master_write_byte(cmd, i2c_cfg.reg_write , ACK_CHECK_EN);
     }
@@ -224,7 +240,9 @@ static int i2c_write(httpd_req_t *req)
         i2c_master_write_byte(cmd, i2c_cfg.write_data[i], ACK_CHECK_EN);
     }
     i2c_master_stop(cmd);
+    trig_set(1);
     esp_err_t ret = i2c_master_cmd_begin(i2c_cfg.port, cmd, 1000 / portTICK_PERIOD_MS);
+    trig_set(0);
     i2c_cmd_link_delete(cmd);
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "Write OK");
@@ -233,7 +251,7 @@ static int i2c_write(httpd_req_t *req)
     } else {
         ESP_LOGW(TAG, "Write Failed");
     }
-    i2c_driver_delete(i2c_port);
+    i2c_driver_delete(i2c_cfg.port);
     return 0;
 }
 
@@ -274,7 +292,9 @@ static int i2c_dump(httpd_req_t *req)
             }
             i2c_master_read_byte(cmd, data + size - 1, NACK_VAL);
             i2c_master_stop(cmd);
+            trig_set(1);
             esp_err_t ret = i2c_master_cmd_begin(i2c_port, cmd, 50 / portTICK_PERIOD_MS);
+            trig_set(0);
             i2c_cmd_link_delete(cmd);
             if (ret == ESP_OK) {
                 for (int k = 0; k < size; k++) {
@@ -314,8 +334,8 @@ static int i2c_dump(httpd_req_t *req)
 // write wifi data from ws to nvs
 static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
 {
-    char key[16];
-    char value[64];
+    char key[32];
+    char value[128];
     esp_err_t err = json_to_str_parm(jsonstr, key, value); // decode json string to key/value pair
     if (err)
     {
@@ -374,7 +394,7 @@ static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
         //i2c_cfg.write_data[0] = atoi(value); //tmp
         char *tok = strtok(value," ");
         int idx=0;
-        while(*tok)
+        while(tok != NULL)
         {
            i2c_cfg.write_data[idx++] = atoi(tok);
            tok=strtok(NULL," ");
@@ -396,7 +416,7 @@ static void set_i2c_tools_data(char *jsonstr, httpd_req_t *req)
     {
         i2c_read(req);
     }
-    else if (strncmp(key, I2C_READ_CMD, sizeof(I2C_READ_CMD)-1) == 0)
+    else if (strncmp(key, I2C_WRITE_CMD, sizeof(I2C_WRITE_CMD)-1) == 0)
     {
         i2c_write(req);
     }

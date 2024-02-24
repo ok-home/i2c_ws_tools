@@ -15,6 +15,7 @@
 
 #include <esp_http_server.h>
 #include "i2c_tools.h"
+#include "logic_analyzer_ws.h"
 
 /* A simple example that demonstrates using websocket echo server
  */
@@ -36,6 +37,7 @@ static httpd_handle_t start_webserver(void)
             ESP_LOGE(TAG, "Error I2C Tools register_uri_handlers");
             goto _ret;
         }
+        logic_analyzer_register_uri_handlers(server);
         return server;
     }
 _ret:

@@ -8,4 +8,10 @@ idf_component_register(
             "."
         EMBED_FILES
             "i2c_tools_html.html"
+        REQUIRES
+            logic_analyzer
+            esp_http_server
+            driver
+            esp_wifi
+            nvs_flash
 )

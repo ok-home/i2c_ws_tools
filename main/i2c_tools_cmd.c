@@ -233,7 +233,7 @@ static int i2c_write(httpd_req_t *req)
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, i2c_cfg.chip << 1 | WRITE_BIT, ACK_CHECK_EN);
-    if (i2c_cfg.write_size) {
+    if (i2c_cfg.reg_write != -1) {
         i2c_master_write_byte(cmd, i2c_cfg.reg_write , ACK_CHECK_EN);
     }
     for (int i = 0; i < i2c_cfg.write_size; i++) {

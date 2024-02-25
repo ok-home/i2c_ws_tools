@@ -1,4 +1,4 @@
-/* WebSocket Echo Server 
+/* WebSocket Echo Server
 
    This  code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -15,10 +15,10 @@
 
 #include <esp_http_server.h>
 #include "i2c_tools.h"
-//#include "logic_analyzer_ws.h"
+// #include "logic_analyzer_ws.h"
 
-/* 
-* Simple websocket http server
+/*
+ * Simple websocket http server
  */
 static const char *TAG = "i2c_tools_ws_server";
 
@@ -28,21 +28,16 @@ static httpd_handle_t start_webserver(void)
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
     // Start the httpd server
-    ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
     if (httpd_start(&server, &config) == ESP_OK)
     {
-        // Registering the ws handler
-        ESP_LOGI(TAG, "Registering URI handlers");
-        if (i2c_tools_register_uri_handlers(server))
-        {
-            ESP_LOGE(TAG, "Error I2C Tools register_uri_handlers");
-            goto _ret;
-        }
+        ESP_LOGI(TAG, "Started server on port: '%d'", config.server_port);
         return server;
     }
-_ret:
-    ESP_LOGE(TAG, "Error starting server!");
-    return NULL;
+    else
+    {
+        ESP_LOGE(TAG, "Error starting server!");
+        return NULL;
+    }
 }
 
 static esp_err_t stop_webserver(httpd_handle_t server)

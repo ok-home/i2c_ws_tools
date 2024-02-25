@@ -496,7 +496,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
 {
     if (req->method == HTTP_GET)
     {
-        ESP_LOGI(TAG, "Handshake done, the new connection was opened");
+        ESP_LOGI(TAG, "Handshake done, the new connection was opened %d",httpd_req_to_sockfd(req));
         // send_nvs_data(req); // read & send initial i2c data from i2c_cfg
         send_default_i2c_cfg_to_ws(req);
         if (i2c_cfg.trig_pin >= 0)
@@ -553,12 +553,12 @@ static esp_err_t get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 static const httpd_uri_t i2c_tools_gh = {
-    .uri = "/i2cTools",
+    .uri = CONFIG_I2C_TOOLS_WEB_URI,
     .method = HTTP_GET,
     .handler = get_handler,
     .user_ctx = NULL};
 static const httpd_uri_t i2c_tools_ws = {
-    .uri = "/i2cTools/ws",
+    .uri = CONFIG_I2C_TOOLS_WEB_WS_URI,
     .method = HTTP_GET,
     .handler = ws_handler,
     .user_ctx = NULL,

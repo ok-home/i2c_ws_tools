@@ -5,5 +5,5 @@ idf_component_register(
             "."
         REQUIRES
             logic_analyzer
-            i2cTools
+            i2c_ws_tools
 )

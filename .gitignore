@@ -1,3 +1,5 @@
 .devcontainer/
 .vscode/
 build/
+i2c_ws_tools_example/sdkconfig
+i2c_ws_tools_example/sdkconfig.old

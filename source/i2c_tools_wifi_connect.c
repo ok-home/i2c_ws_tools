@@ -1,5 +1,5 @@
 /*
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
+   This code is in the Public Domain (or CC0 licensed, at your option.)
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -31,7 +31,7 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
-static const char *TAG = "la_wifi_connect";
+static const char *TAG = "i2c_wifi_connect";
 
 static int short_retry_num = 0;
 

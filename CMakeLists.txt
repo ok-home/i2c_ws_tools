@@ -1,6 +1,18 @@
-# The following lines of boilerplate have to be in your project's CMakeLists
-# in this exact order for cmake to work correctly
-cmake_minimum_required(VERSION 3.16)
-
-include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(i2cTools)
+idf_component_register(
+    SRCS 
+        source/i2c_tools_cmd.c
+        source/i2c_tools_web_server.c
+        source/i2c_tools_wifi_connect.c
+    INCLUDE_DIRS 
+        include
+    PRIV_INCLUDE_DIRS 
+        private_include
+    REQUIRES 
+       esp_http_server
+    PRIV_REQUIRES 
+        nvs_flash 
+        esp_wifi
+        driver
+    EMBED_FILES 
+        source/i2c_tools_html.html
+)

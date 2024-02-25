@@ -1,6 +1,6 @@
-/* WebSocket Echo Server Example
+/* WebSocket Echo Server 
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
+   This  code is in the Public Domain (or CC0 licensed, at your option.)
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -15,9 +15,10 @@
 
 #include <esp_http_server.h>
 #include "i2c_tools.h"
-#include "logic_analyzer_ws.h"
+//#include "logic_analyzer_ws.h"
 
-/* A simple example that demonstrates using websocket echo server
+/* 
+* Simple websocket http server
  */
 static const char *TAG = "i2c_tools_ws_server";
 
@@ -37,7 +38,6 @@ static httpd_handle_t start_webserver(void)
             ESP_LOGE(TAG, "Error I2C Tools register_uri_handlers");
             goto _ret;
         }
-        logic_analyzer_register_uri_handlers(server);
         return server;
     }
 _ret:
@@ -81,17 +81,10 @@ static void connect_handler(void *arg, esp_event_base_t event_base,
 }
 // create & start ws server
 // if server already running
-// skip & go to la_ws - register uri handlers
-void i2c_tools_ws_server(void)
+// skip & go to register uri handlers
+httpd_handle_t i2c_tools_ws_server(void)
 {
     static httpd_handle_t server = NULL;
-
-//#ifdef CONFIG_ANALYZER_WIFI_CONNECT
-
-//#include "i2c_tools_wifi_connect.h"
-//i2c_tools_wifi_connect();
-
-//#endif
 
     /* Register event handlers to stop the server when Wi-Fi or Ethernet is disconnected,
      * and re-start it upon connection.
@@ -102,4 +95,5 @@ void i2c_tools_ws_server(void)
 
     /* Start the server for the first time */
     server = start_webserver();
+    return server;
 }

@@ -17,9 +17,6 @@
 
 #include "i2c_tools.h"
 
-//#define  CONFIG_I2C_TOOLS_WIFI_SSID "ok-home-Keenetic"
-//#define  CONFIG_I2C_TOOLS_WIFI_PASS "RicohPriport"
-
 #define STA_ESP_MAXIMUM_RETRY 5
 
 /* FreeRTOS event group to signal when we are connected*/

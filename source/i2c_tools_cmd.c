@@ -31,7 +31,7 @@
 
 static const char *TAG = "i2c_tools_cmd";
 
-// cfg
+// web cfg
 #define I2C_PORT_HTML "i2cPortConfig"
 #define I2C_SCL_HTML "i2cSCLConfig"
 #define I2C_SDA_HTML "i2cSDAConfig"
@@ -48,7 +48,7 @@ static const char *TAG = "i2c_tools_cmd";
 #define I2C_WRITE_SIZE_HTML "i2cRegisterSetSize"
 #define I2C_WRITE_DATA_HTML "i2cRegisterSetData"
 
-// cmd
+// web cmd
 #define I2C_SCAN_CMD "ScanCmd"
 #define I2C_DUMP_CMD "DumpCmd"
 #define I2C_READ_CMD "GetCmd"
@@ -497,7 +497,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
     if (req->method == HTTP_GET)
     {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened %d",httpd_req_to_sockfd(req));
-        // send_nvs_data(req); // read & send initial i2c data from i2c_cfg
+        // read & send initial i2c data from i2c_cfg
         send_default_i2c_cfg_to_ws(req);
         if (i2c_cfg.trig_pin >= 0)
         {
